@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # RMarkdown Editing
 
-___R Markdown is a file format for making dynamic documents with R. An R Markdown document is written in markdown (an easy-to-write plain text format) and contains chunks of embedded R code, like the document below.___
+***R Markdown is a file format for making dynamic documents with R. An R Markdown document is written in markdown (an easy-to-write plain text format) and contains chunks of embedded R code, like the document below.***
 
 Resource: https://rmarkdown.rstudio.com/lesson-8.html
 
