@@ -1,0 +1,324 @@
+---
+title: "Assessment 2"
+author: "Felita Pratomo S4660121"
+date: '2022-03-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Felita Pratomo* **S4660121**
+
+-----
+
+# Assessment 2
+
+----
+
+
+###  Load the packages
+
+```{r}
+library(tidyverse)
+
+library(knitr)
+
+library(skimr)
+
+library(readr)
+```
+
+
+
+### Load the dataset
+```{r}
+
+thanksgiving_meals <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")  
+
+```
+
+
+
+### 1. Display the first 10 rows of the dataset using `kable()` function (1 marks). 
+
+```{r}
+
+kable(thanksgiving_meals[1:10, 1:5])
+
+```
+
+
+
+### 2. Using `skim()` display the summary of variables. 
+
+Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? 
+  Write 2-3 sentences with your explanation. (2 marks)
+
+Think about the task to predict a community type or US_region based on their menu: what variables may be useful? Are all of them correct type? (2 marks)
+
+
+```{r}
+
+skim(thanksgiving_meals)
+
+```
+
+Variables that might be useful to predict a family income based on their menu are the main dish and cranberry sauce.
+Logically, we might be able to see which family can afford more expensive main dish and either cranberry sauce is homemade or bought. 
+Also, judging by their unique values, main dish has 8 and cranberry sauce has 4 which might boost the prediction accuracy rate. 
+
+
+Variables that might be useful to predict a community type or US region based on their menu are cranberry sauce, sides, pies. 
+We might be able to tell whether a certain region/community type has a culture of making their own cranberry sauce, choosing certain sides or any favorite pies. 
+Otherwise, their unique values might be able to help predict the family income. 
+
+
+
+### 3. Use `fct_reorder` and `parse_number` functions to create a factor variable `family_income`(2 mark).
+
+```{r}
+
+thanksgiving_meals <- thanksgiving_meals %>%
+  mutate(family_income = fct_reorder(family_income, parse_number(family_income)))
+
+class(thanksgiving_meals$family_income)
+
+```
+
+
+
+### 4. What is the number of people who celebrate? (1 mark)
+
+The number of people who celebrate is 980.
+
+```{r}
+thanksgiving_meals %>%
+  count(celebrate, sort = TRUE) %>%
+  rename("No. of people" = n) %>%
+  kable()
+```
+
+
+
+### 5. What are categories and insights for each main dish served and the method it is prepared? (2 marks)
+
+
+```{r}
+thanksgiving_meals %>%
+  summarise(main_dish, main_prep) %>%
+  count(main_dish, main_prep, sort = TRUE) %>%
+  rename("Main Dish" = main_dish, "Cooking Method" = main_prep, "No. of Households" = n) %>%
+  kable()
+```
+
+From the table above, we can gain some insights as follows:
+
+- The most popular main dish for thanksgiving is Turkey with two methods: "baked" by 422 households and "roasted" by 351 households. 
+
+- The second most popular main dish is Ham/Pork with two methods: "baked" by 22 households and "roasted" by 5 households.
+
+etc. 
+
+
+
+### 6. Create 3 different data viz showing insights for main dish served and the method. Provide your own legend and use themes.
+Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+
+```{r}
+thanksgiving_meals %>%
+  count(main_prep, main_dish) %>%
+  ggplot(aes(main_dish, n, fill = main_prep)) +
+  geom_col() +
+  facet_wrap(~main_prep) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Number of Main Dish by Cooking Methods", fill = "Cooking Methods", x = "Main Dish", y = "Number of Main Dish", caption = "Data Viz 1: Bar Graph")
+ 
+```
+
+Data Viz 1 above shows "Turkey" as the most popular main dish with "Baked" as the most popular cooking method.
+
+
+
+```{r}
+thanksgiving_meals %>%
+  count(main_dish, main_prep, community_type) %>%
+  ggplot(aes(main_dish, n, fill = main_prep)) +
+  geom_col(col = "black") +
+  scale_fill_brewer(palette = "Spectral") +
+  facet_wrap(~community_type) +
+  coord_flip() +
+  theme_grey() +
+  labs(title = "The distribution of Main Dish by its Cooking Methods in different Community Types", 
+       fill = "Cooking Method", x = "Main Dish", y = "No. of Households", caption = "Data Viz 2: Bar Graph") 
+```
+
+Data Viz 2 above shows that the most popular cooking methods in different community types are "Roasted" and "Baked" with similar percentage in distribution between the two methods. 
+
+
+
+```{r}
+thanksgiving_meals %>%
+  count(main_dish, main_prep, gender) %>%
+  ggplot(aes(main_dish, n, fill = main_prep)) +
+  geom_col() +
+  facet_wrap(~gender) +
+  coord_flip() +
+  theme_bw() +
+  labs(title = "The distribution of Main Dish by its Cooking Methods in different Gender", 
+       fill = "Cooking Method", x = "Main Dish", y = "No. of Households", caption = "Data Viz 3: Bar Graph") 
+```
+
+Data Viz 3 above shows the distribution of Main Dish by its Cooking Methods in different Gender.
+It can be seen that there is no huge difference in the distribution between Female and male. 
+The most popular cooking methods are still "Roasted" and "Baked". 
+
+
+
+### 7. How many use cranberry sauce? How many use gravy? 2marks
+
+```{r}
+
+thanksgiving_meals %>%
+  count(cranberry, sort = TRUE) %>%
+  rename("No. of people" = n) %>%
+  kable()
+  
+thanksgiving_meals %>%
+  count(gravy, sort = TRUE) %>%
+  rename("No. of people" = n) %>%
+  kable()
+  
+```
+
+According to the data, there are 828 people who use cranberry sauce and 892 people who use gravy. 
+
+
+
+### 8-9. What is the distribution of those who celebrate across income ranges. Create a data viz.
+Write 2-3 sentences with your explanation of each insight. (4 marks)
+
+
+The graph below explains the distribution of households who celebrate thanksgiving across their income ranges. 
+It can be seen that thanksgivings are most celebrated by households who have a total income range of $25,000 to $49,999.
+Households who celebrate that have more than a total income range of $125,000 above are much lesser in number compared to the lower income ranges. 
+
+
+```{r}
+
+thanksgiving_meals %>%
+  count(family_income, celebrate) %>%
+  filter(celebrate == "Yes") %>%
+  ggplot(aes(family_income, n)) +
+  geom_col() +
+  facet_grid(~celebrate) +
+  coord_flip() +
+  labs(title = "The Distribution of Households Who Celebrate across Their Income Ranges", x = "Family Income", y = "No. of People")
+
+```
+
+
+
+### 10. Use the following code to create a new data set 2 mark
+
+
+```{r}
+
+thanksgiving_2 <- thanksgiving_meals %>% 
+  select(id, starts_with("side"),
+       starts_with("pie"),
+       starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+
+```
+
+#### Write 2-3 sentences with your explanation of what it does. (4 marks)
+
+The code above is to sort what people have for their sides, pies and desserts in a new dataset, 
+with an exception to exclude side 15, pie 13 and dessert 12. Then, gathered it by three columns 
+type, value and id (which already existed) with conditions to remove NA value by using filter function, also none and other values. 
+
+
+
+
+### 11-12. Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor 
+#### Write 2-3 sentences with your explanation of what it does. (2 marks)
+
+The function "pairwise_cor()" shows correlations of pairs of items in a column, based on a "feature" column that links them together.
+
+
+#### Write 1 sentence with your explanation of what insights it shows. (2 marks)
+
+The code below sorts the outcome by descending order and the result shows cookies and brownies have the top correlation number of 0.410.
+
+```{r}
+#install.packages("widyr")
+
+library(widyr)
+
+
+thanksgiving_2 %>%
+  pairwise_cor(value, id, sort = TRUE) 
+```
+
+
+
+
+### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
+### Compare 3 models using different set of input variables. Use different number of variables.
+
+#### Explain your choice of variables (3 sentences) 
+
+
+```{r}
+#install.packages("randomForest")
+
+library(randomForest)
+
+```
+
+
+First Model: using 3 variables (main dish, cranberry sauce and gender).
+
+```{r}
+rf1 <- randomForest(family_income ~ main_dish + cranberry + gender, data = thanksgiving_meals, na.action = na.omit)
+
+print(rf1)
+```
+
+
+Second Model: using 5 variables (main dish, cranberry sauce, community type, gender, and age).
+
+```{r}
+rf2 <- randomForest(family_income ~ main_dish + cranberry + community_type + gender + age, data = thanksgiving_meals, na.action = na.omit)
+
+print(rf2)
+```
+
+
+Third Model: using 7 variables (main dish, main prep, cranberry, age, gender, us region, and work black friday).
+
+```{r}
+rf3 <- randomForest(family_income ~ main_dish + main_prep + cranberry + age  + gender + us_region + work_black_friday, data = thanksgiving_meals, na.action = na.omit)
+
+print(rf3)
+```
+
+
+#### Write 2 sentences explaining which model os best.
+
+From the results, it can be seen that Model 2 is probably the best out of the 3 models tested above as it generates the lowest error rate. 
+
+
+
+
+
+
+
